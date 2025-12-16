@@ -2,12 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#065f46">
+    
+    <!-- Camera Permission -->
+    <meta http-equiv="Permissions-Policy" content="camera=*, microphone=*">
+    
     <title>Ramadhan Events - Fakultas Teknik UGM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap');
         
@@ -131,11 +143,70 @@
             border-radius: 20px;
             box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
             animation: scannerPulse 2s ease-in-out infinite;
+            position: relative;
+            background: #000;
         }
         
         @keyframes scannerPulse {
             0%, 100% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.5); }
             50% { box-shadow: 0 0 50px rgba(251, 191, 36, 0.8); }
+        }
+        
+        /* QR Scanner Responsive Fix */
+        #qr-reader {
+            width: 100% !important;
+            border: none !important;
+        }
+        
+        #qr-reader video {
+            width: 100% !important;
+            height: auto !important;
+            object-fit: cover !important;
+            border-radius: 15px !important;
+        }
+        
+        #qr-reader__scan_region {
+            min-height: 250px !important;
+        }
+        
+        #qr-reader__dashboard {
+            padding: 10px !important;
+        }
+        
+        #qr-reader__dashboard button {
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            background: #059669 !important;
+            color: white !important;
+            border: none !important;
+            margin: 5px !important;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 640px) {
+            .card {
+                border-radius: 15px;
+                margin: 8px;
+            }
+            
+            .modal {
+                padding: 10px;
+            }
+            
+            .crescent {
+                width: 40px;
+                height: 40px;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .mosque-silhouette {
+                height: 100px;
+            }
+            
+            #qr-reader__scan_region {
+                min-height: 200px !important;
+            }
         }
         
         /* QR Code Refresh Animation */
@@ -266,66 +337,66 @@
         </div>
 
         <!-- User Dashboard -->
-        <div id="user-dashboard" class="hidden min-h-screen p-4 pb-24">
+        <div id="user-dashboard" class="hidden min-h-screen p-2 sm:p-4 pb-24">
             <div class="max-w-6xl mx-auto">
                 <!-- Header -->
-                <div class="card p-6 mb-6">
-                    <div class="flex justify-between items-center">
+                <div class="card p-4 sm:p-6 mb-4 sm:mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Assalamu'alaikum</h2>
-                            <p class="text-sm text-gray-600">Event Ramadhan Fakultas Teknik UGM</p>
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Assalamu'alaikum</h2>
+                            <p class="text-xs sm:text-sm text-gray-600">Event Ramadhan FT UGM</p>
                         </div>
-                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all">
-                            <i class="fas fa-sign-out-alt mr-2"></i>Keluar
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded-lg transition-all text-sm">
+                            <i class="fas fa-sign-out-alt mr-1 sm:mr-2"></i>Keluar
                         </button>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <button onclick="openScanner()" class="card p-6 hover:shadow-2xl transition-all cursor-pointer group">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 p-4 rounded-xl group-hover:scale-110 transition-transform">
-                                <i class="fas fa-qrcode text-3xl text-white"></i>
+                <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <button onclick="openScanner()" class="card p-4 sm:p-6 hover:shadow-2xl transition-all cursor-pointer group">
+                        <div class="flex flex-col sm:flex-row items-center sm:space-x-4 text-center sm:text-left">
+                            <div class="bg-gradient-to-br from-emerald-500 to-emerald-700 p-3 sm:p-4 rounded-xl group-hover:scale-110 transition-transform mb-2 sm:mb-0">
+                                <i class="fas fa-qrcode text-2xl sm:text-3xl text-white"></i>
                             </div>
-                            <div class="text-left">
-                                <h3 class="text-lg font-semibold text-gray-800">Scan Barcode</h3>
-                                <p class="text-sm text-gray-600">Daftar Event Baru</p>
+                            <div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">Scan QR</h3>
+                                <p class="text-xs sm:text-sm text-gray-600 hidden sm:block">Daftar Event Baru</p>
                             </div>
                         </div>
                     </button>
                     
-                    <div class="card p-6">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-gradient-to-br from-yellow-500 to-yellow-700 p-4 rounded-xl">
-                                <i class="fas fa-ticket-alt text-3xl text-white"></i>
+                    <div class="card p-4 sm:p-6">
+                        <div class="flex flex-col sm:flex-row items-center sm:space-x-4 text-center sm:text-left">
+                            <div class="bg-gradient-to-br from-yellow-500 to-yellow-700 p-3 sm:p-4 rounded-xl mb-2 sm:mb-0">
+                                <i class="fas fa-ticket-alt text-2xl sm:text-3xl text-white"></i>
                             </div>
-                            <div class="text-left">
-                                <h3 class="text-lg font-semibold text-gray-800">Total Tiket</h3>
-                                <p class="text-2xl font-bold text-gray-800" id="total-tickets">0</p>
+                            <div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">Total Tiket</h3>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" id="total-tickets">0</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Active Events -->
-                <div class="mb-6">
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                <div class="mb-4 sm:mb-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
                         <i class="fas fa-calendar-check mr-2 text-yellow-400"></i>
                         Event Aktif
                     </h3>
-                    <div id="active-events" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="active-events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <!-- Events will be populated here -->
                     </div>
                 </div>
 
                 <!-- Past Events -->
                 <div>
-                    <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
                         <i class="fas fa-history mr-2 text-yellow-400"></i>
                         Event Selesai
                     </h3>
-                    <div id="past-events" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div id="past-events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         <!-- Events will be populated here -->
                     </div>
                 </div>
@@ -451,18 +522,34 @@
 
     <!-- Scanner Modal -->
     <div id="scanner-modal" class="modal">
-        <div class="card w-full max-w-md p-6 m-4">
+        <div class="card w-full max-w-md p-4 sm:p-6 m-2 sm:m-4">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Scan Barcode Event</h3>
-                <button onclick="closeScanner()" class="text-gray-500 hover:text-gray-700">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800">Scan Barcode Event</h3>
+                <button onclick="closeScanner()" class="text-gray-500 hover:text-gray-700 p-2">
                     <i class="fas fa-times text-2xl"></i>
                 </button>
             </div>
-            <div id="qr-reader" class="scanner-frame overflow-hidden"></div>
-            <p class="text-sm text-gray-600 text-center mt-4">
+            
+            <!-- Scanner Status -->
+            <div id="scanner-status" class="mb-3 p-3 bg-blue-50 rounded-lg text-center">
+                <i class="fas fa-spinner fa-spin mr-2 text-blue-600"></i>
+                <span class="text-sm text-blue-700">Memuat kamera...</span>
+            </div>
+            
+            <!-- Scanner Container - RESPONSIVE -->
+            <div id="qr-reader-container" class="scanner-frame overflow-hidden rounded-xl" style="min-height: 280px;">
+                <div id="qr-reader" style="width: 100%;"></div>
+            </div>
+            
+            <p class="text-xs sm:text-sm text-gray-600 text-center mt-4">
                 <i class="fas fa-info-circle mr-2"></i>
-                Arahkan kamera ke barcode event
+                Arahkan kamera ke QR Code event
             </p>
+            
+            <!-- Manual Camera Switch for Mobile -->
+            <button onclick="switchCamera()" class="w-full mt-3 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium transition-all">
+                <i class="fas fa-sync-alt mr-2"></i>Ganti Kamera
+            </button>
         </div>
     </div>
 
@@ -634,35 +721,45 @@
     </div>
 
     <script>
-        // Database & Security
-        class SecureDB {
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAY4SEN3ei37fnc7_B6Edo1B_YrdnrSq3A",
+            authDomain: "first-a0709.firebaseapp.com",
+            databaseURL: "https://first-a0709-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "first-a0709",
+            storageBucket: "first-a0709.firebasestorage.app",
+            messagingSenderId: "1045107787444",
+            appId: "1:1045107787444:web:bf1a5f50cc1f8808f739e1",
+            measurementId: "G-VET25W16XB"
+        };
+
+        // Initialize Firebase
+        let firebaseApp, database;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log("✅ Firebase connected successfully!");
+        } catch (error) {
+            console.error("❌ Firebase initialization error:", error);
+            alert("Firebase belum dikonfigurasi! Silakan ikuti panduan setup.");
+        }
+
+        // ============================================
+        // FIREBASE DATABASE CLASS
+        // ============================================
+        class FirebaseDB {
             constructor() {
-                this.encryptionKey = 'ramadhan-ft-ugm-2024-secure-key';
+                this.db = database;
+                this.eventsRef = this.db.ref('events');
+                this.ticketsRef = this.db.ref('tickets');
                 this.init();
             }
             
             init() {
-                if (!localStorage.getItem('events')) {
-                    localStorage.setItem('events', this.encrypt(JSON.stringify([])));
-                }
-                if (!localStorage.getItem('userTickets')) {
-                    localStorage.setItem('userTickets', this.encrypt(JSON.stringify({})));
-                }
                 if (!localStorage.getItem('deviceId')) {
                     localStorage.setItem('deviceId', this.generateDeviceId());
-                }
-            }
-            
-            encrypt(data) {
-                // Simple encryption (in production, use proper encryption library)
-                return btoa(encodeURIComponent(data));
-            }
-            
-            decrypt(data) {
-                try {
-                    return decodeURIComponent(atob(data));
-                } catch (e) {
-                    return '[]';
                 }
             }
             
@@ -683,40 +780,87 @@
                 return Math.abs(hash).toString(36);
             }
             
-            getEvents() {
-                const data = localStorage.getItem('events');
-                return JSON.parse(this.decrypt(data));
-            }
-            
-            saveEvents(events) {
-                localStorage.setItem('events', this.encrypt(JSON.stringify(events)));
-            }
-            
-            getUserTickets() {
-                const data = localStorage.getItem('userTickets');
-                const tickets = JSON.parse(this.decrypt(data));
-                const deviceId = localStorage.getItem('deviceId');
-                return tickets[deviceId] || [];
-            }
-            
-            saveUserTickets(tickets) {
-                const data = localStorage.getItem('userTickets');
-                const allTickets = JSON.parse(this.decrypt(data));
-                const deviceId = localStorage.getItem('deviceId');
-                allTickets[deviceId] = tickets;
-                localStorage.setItem('userTickets', this.encrypt(JSON.stringify(allTickets)));
-            }
-            
             getDeviceId() {
                 return localStorage.getItem('deviceId');
             }
+            
+            // Events Management
+            async createEvent(eventData) {
+                const eventId = 'evt-' + Date.now();
+                await this.eventsRef.child(eventId).set({
+                    ...eventData,
+                    id: eventId,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP,
+                    visitors: {}
+                });
+                return eventId;
+            }
+            
+            async updateEvent(eventId, eventData) {
+                await this.eventsRef.child(eventId).update(eventData);
+            }
+            
+            async deleteEvent(eventId) {
+                await this.eventsRef.child(eventId).remove();
+            }
+            
+            onEventsChange(callback) {
+                this.eventsRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    const events = data ? Object.values(data) : [];
+                    callback(events);
+                });
+            }
+            
+            async addVisitor(eventId, visitorData) {
+                const visitorId = this.getDeviceId();
+                await this.eventsRef.child(eventId).child('visitors').child(visitorId).set({
+                    ...visitorData,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            
+            async checkVisitorExists(eventId, deviceId) {
+                const snapshot = await this.eventsRef.child(eventId).child('visitors').child(deviceId).once('value');
+                return snapshot.exists();
+            }
+            
+            // Tickets Management
+            async createTicket(ticketData) {
+                const deviceId = this.getDeviceId();
+                const ticketId = ticketData.eventId;
+                await this.ticketsRef.child(deviceId).child(ticketId).set({
+                    ...ticketData,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+            
+            onUserTicketsChange(callback) {
+                const deviceId = this.getDeviceId();
+                this.ticketsRef.child(deviceId).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    const tickets = data ? Object.values(data) : [];
+                    callback(tickets);
+                });
+            }
+            
+            offEventsChange() {
+                this.eventsRef.off();
+            }
+            
+            offUserTicketsChange() {
+                const deviceId = this.getDeviceId();
+                this.ticketsRef.child(deviceId).off();
+            }
         }
 
-        const db = new SecureDB();
+        const db = new FirebaseDB();
         let currentUser = null;
         let qrScanner = null;
         let currentEventId = null;
         let qrRefreshInterval = null;
+        let cachedEvents = [];
+        let cachedTickets = [];
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -772,8 +916,23 @@
 
         // User Dashboard
         function loadUserDashboard() {
-            const events = db.getEvents();
-            const userTickets = db.getUserTickets();
+            // Listen to real-time events updates
+            db.onEventsChange((events) => {
+                cachedEvents = events;
+                renderUserEvents();
+            });
+            
+            // Listen to real-time tickets updates
+            db.onUserTicketsChange((tickets) => {
+                cachedTickets = tickets;
+                renderUserEvents();
+                document.getElementById('total-tickets').textContent = tickets.length;
+            });
+        }
+        
+        function renderUserEvents() {
+            const events = cachedEvents;
+            const userTickets = cachedTickets;
             const now = new Date();
             
             const activeEvents = events.filter(e => new Date(e.endDate) > now);
@@ -781,6 +940,8 @@
             
             const activeEventsContainer = document.getElementById('active-events');
             const pastEventsContainer = document.getElementById('past-events');
+            
+            if (!activeEventsContainer || !pastEventsContainer) return;
             
             activeEventsContainer.innerHTML = '';
             pastEventsContainer.innerHTML = '';
@@ -801,8 +962,6 @@
                     pastEventsContainer.innerHTML += createEventCard(event, true, true);
                 });
             }
-            
-            document.getElementById('total-tickets').textContent = userTickets.length;
         }
 
         function createEventCard(event, hasTicket, isPast = false) {
@@ -840,35 +999,165 @@
             return date.toLocaleDateString('id-ID', options);
         }
 
+        // Scanner Variables
+        let currentFacingMode = "environment"; // back camera default
+        let scannerIsRunning = false;
+        
         // Scanner
         function openScanner() {
             const modal = document.getElementById('scanner-modal');
             modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
             
-            if (!qrScanner) {
-                qrScanner = new Html5Qrcode("qr-reader");
-            }
+            // Reset status
+            updateScannerStatus('loading', 'Memuat kamera...');
+            
+            startScanner();
+        }
+        
+        function startScanner() {
+            // Clear previous scanner
+            const readerElement = document.getElementById('qr-reader');
+            readerElement.innerHTML = '';
+            
+            // Create new scanner instance
+            qrScanner = new Html5Qrcode("qr-reader");
+            
+            // Calculate QR box size based on screen width
+            const screenWidth = window.innerWidth;
+            let qrboxSize = Math.min(250, screenWidth - 100);
+            if (screenWidth < 400) qrboxSize = 180;
+            
+            const config = {
+                fps: 10,
+                qrbox: { width: qrboxSize, height: qrboxSize },
+                aspectRatio: 1,
+                formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+            };
             
             qrScanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
+                { facingMode: currentFacingMode },
+                config,
                 onScanSuccess,
                 onScanError
-            ).catch(err => {
+            ).then(() => {
+                scannerIsRunning = true;
+                updateScannerStatus('success', 'Kamera aktif - Arahkan ke QR Code');
+                console.log("✅ Scanner started successfully");
+            }).catch(err => {
                 console.error("Scanner error:", err);
-                alert("Tidak dapat mengakses kamera. Pastikan Anda memberikan izin akses kamera.");
+                scannerIsRunning = false;
+                
+                // Try front camera if back camera fails
+                if (currentFacingMode === "environment") {
+                    console.log("Trying front camera...");
+                    currentFacingMode = "user";
+                    startScanner();
+                } else {
+                    updateScannerStatus('error', 'Gagal mengakses kamera. Pastikan izin kamera diberikan.');
+                    
+                    // Show file input as fallback
+                    showFileUploadFallback();
+                }
+            });
+        }
+        
+        function updateScannerStatus(type, message) {
+            const statusEl = document.getElementById('scanner-status');
+            if (!statusEl) return;
+            
+            let icon, bgColor, textColor;
+            
+            switch(type) {
+                case 'loading':
+                    icon = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+                    bgColor = 'bg-blue-50';
+                    textColor = 'text-blue-700';
+                    break;
+                case 'success':
+                    icon = '<i class="fas fa-camera mr-2"></i>';
+                    bgColor = 'bg-green-50';
+                    textColor = 'text-green-700';
+                    break;
+                case 'error':
+                    icon = '<i class="fas fa-exclamation-triangle mr-2"></i>';
+                    bgColor = 'bg-red-50';
+                    textColor = 'text-red-700';
+                    break;
+            }
+            
+            statusEl.className = `mb-3 p-3 rounded-lg text-center ${bgColor}`;
+            statusEl.innerHTML = `${icon}<span class="text-sm ${textColor}">${message}</span>`;
+        }
+        
+        function showFileUploadFallback() {
+            const container = document.getElementById('qr-reader');
+            container.innerHTML = `
+                <div class="p-6 text-center bg-gray-100 rounded-xl">
+                    <i class="fas fa-camera-retro text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600 mb-4">Kamera tidak tersedia</p>
+                    <label class="btn-primary text-white py-3 px-6 rounded-lg cursor-pointer inline-block">
+                        <i class="fas fa-upload mr-2"></i>Upload Gambar QR
+                        <input type="file" accept="image/*" capture="environment" onchange="handleFileUpload(event)" class="hidden">
+                    </label>
+                </div>
+            `;
+        }
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            updateScannerStatus('loading', 'Memproses gambar...');
+            
+            Html5Qrcode.scanFile(file, true)
+                .then(decodedText => {
+                    onScanSuccess(decodedText);
+                })
+                .catch(err => {
+                    console.error("File scan error:", err);
+                    updateScannerStatus('error', 'QR Code tidak ditemukan di gambar');
+                });
+        }
+        
+        function switchCamera() {
+            if (!scannerIsRunning) {
+                startScanner();
+                return;
+            }
+            
+            // Switch facing mode
+            currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+            
+            updateScannerStatus('loading', 'Mengganti kamera...');
+            
+            qrScanner.stop().then(() => {
+                scannerIsRunning = false;
+                startScanner();
+            }).catch(err => {
+                console.error("Error switching camera:", err);
+                startScanner();
             });
         }
 
         function closeScanner() {
-            if (qrScanner) {
+            if (qrScanner && scannerIsRunning) {
                 qrScanner.stop().then(() => {
+                    scannerIsRunning = false;
                     document.getElementById('scanner-modal').classList.remove('active');
-                }).catch(err => console.error(err));
+                    document.body.style.overflow = '';
+                }).catch(err => {
+                    console.error(err);
+                    document.getElementById('scanner-modal').classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            } else {
+                document.getElementById('scanner-modal').classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
 
-        function onScanSuccess(decodedText) {
+        async function onScanSuccess(decodedText) {
             try {
                 const data = JSON.parse(decodedText);
                 
@@ -877,8 +1166,7 @@
                     return;
                 }
                 
-                const events = db.getEvents();
-                const event = events.find(e => e.id === data.eventId);
+                const event = cachedEvents.find(e => e.id === data.eventId);
                 
                 if (!event) {
                     alert('Event tidak ditemukan!');
@@ -896,15 +1184,14 @@
                 }
                 
                 // Check if user already registered
-                const userTickets = db.getUserTickets();
-                if (userTickets.some(t => t.eventId === event.id)) {
+                if (cachedTickets.some(t => t.eventId === event.id)) {
                     alert('Anda sudah terdaftar di event ini!');
                     closeScanner();
                     return;
                 }
                 
                 // Register user
-                registerToEvent(event);
+                await registerToEvent(event);
                 closeScanner();
                 
             } catch (e) {
@@ -917,51 +1204,41 @@
             // Ignore scan errors
         }
 
-        function registerToEvent(event) {
+        async function registerToEvent(event) {
             const deviceId = db.getDeviceId();
             const userAgent = navigator.userAgent;
             const deviceInfo = getDeviceInfo();
             const ipAddress = 'Dynamic-IP-' + Math.random().toString(36).substr(2, 9); // Simulated IP
             
-            // Add visitor to event
-            const events = db.getEvents();
-            const eventIndex = events.findIndex(e => e.id === event.id);
-            
-            if (!events[eventIndex].visitors) {
-                events[eventIndex].visitors = [];
+            try {
+                // Check if device already registered
+                const exists = await db.checkVisitorExists(event.id, deviceId);
+                if (exists) {
+                    alert('Device Anda sudah terdaftar di event ini!');
+                    return;
+                }
+                
+                // Add visitor to event
+                await db.addVisitor(event.id, {
+                    deviceId: deviceId,
+                    ipAddress: ipAddress,
+                    deviceInfo: deviceInfo,
+                    userAgent: userAgent
+                });
+                
+                // Add ticket to user
+                const ticketCode = generateTicketCode();
+                await db.createTicket({
+                    eventId: event.id,
+                    eventName: event.name,
+                    ticketCode: ticketCode
+                });
+                
+                alert('✅ Berhasil mendaftar ke event: ' + event.name);
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('❌ Gagal mendaftar. Silakan coba lagi.');
             }
-            
-            // Check if device already registered
-            if (events[eventIndex].visitors.some(v => v.deviceId === deviceId)) {
-                alert('Device Anda sudah terdaftar di event ini!');
-                return;
-            }
-            
-            events[eventIndex].visitors.push({
-                deviceId: deviceId,
-                timestamp: new Date().toISOString(),
-                ipAddress: ipAddress,
-                deviceInfo: deviceInfo,
-                userAgent: userAgent
-            });
-            
-            db.saveEvents(events);
-            
-            // Add ticket to user
-            const userTickets = db.getUserTickets();
-            const ticketCode = generateTicketCode();
-            
-            userTickets.push({
-                eventId: event.id,
-                eventName: event.name,
-                ticketCode: ticketCode,
-                registeredAt: new Date().toISOString()
-            });
-            
-            db.saveUserTickets(userTickets);
-            
-            alert('Berhasil mendaftar ke event: ' + event.name);
-            loadUserDashboard();
         }
 
         function getDeviceInfo() {
@@ -999,10 +1276,8 @@
         let ticketQRCode = null;
         
         function showTicket(eventId) {
-            const events = db.getEvents();
-            const event = events.find(e => e.id === eventId);
-            const userTickets = db.getUserTickets();
-            const ticket = userTickets.find(t => t.eventId === eventId);
+            const event = cachedEvents.find(e => e.id === eventId);
+            const ticket = cachedTickets.find(t => t.eventId === eventId);
             
             if (!event || !ticket) return;
             
@@ -1038,7 +1313,16 @@
 
         // Admin Dashboard
         function loadAdminDashboard() {
-            const events = db.getEvents();
+            // Listen to real-time events updates
+            db.onEventsChange((events) => {
+                cachedEvents = events;
+                updateAdminStats();
+                loadAdminEventsList();
+            });
+        }
+        
+        function updateAdminStats() {
+            const events = cachedEvents;
             const now = new Date();
             const activeEvents = events.filter(e => new Date(e.endDate) > now);
             
@@ -1047,8 +1331,9 @@
             
             events.forEach(event => {
                 if (event.visitors) {
-                    totalVisitors += event.visitors.length;
-                    event.visitors.forEach(v => uniqueDevices.add(v.deviceId));
+                    const visitorsArray = Object.values(event.visitors);
+                    totalVisitors += visitorsArray.length;
+                    visitorsArray.forEach(v => uniqueDevices.add(v.deviceId));
                 }
             });
             
@@ -1056,13 +1341,13 @@
             document.getElementById('active-events-count').textContent = activeEvents.length;
             document.getElementById('total-visitors').textContent = totalVisitors;
             document.getElementById('unique-devices').textContent = uniqueDevices.size;
-            
-            loadAdminEventsList();
         }
 
         function loadAdminEventsList() {
-            const events = db.getEvents();
+            const events = cachedEvents;
             const container = document.getElementById('admin-events-list');
+            
+            if (!container) return;
             
             if (events.length === 0) {
                 container.innerHTML = '<p class="text-gray-500 text-center">Belum ada event</p>';
@@ -1072,7 +1357,7 @@
             container.innerHTML = events.map(event => {
                 const now = new Date();
                 const isActive = new Date(event.endDate) > now;
-                const visitorsCount = event.visitors ? event.visitors.length : 0;
+                const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
                 
                 return `
                     <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-emerald-400 transition-all cursor-pointer event-item" data-event-id="${event.id}">
@@ -1119,35 +1404,31 @@
             document.getElementById('create-event-form').reset();
         }
 
-        document.getElementById('create-event-form').addEventListener('submit', function(e) {
+        document.getElementById('create-event-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const event = {
-                id: 'evt-' + Date.now(),
                 name: document.getElementById('event-name').value,
                 description: document.getElementById('event-description').value,
                 startDate: document.getElementById('event-start').value,
                 endDate: document.getElementById('event-end').value,
-                location: document.getElementById('event-location').value,
-                createdAt: new Date().toISOString(),
-                visitors: []
+                location: document.getElementById('event-location').value
             };
             
-            const events = db.getEvents();
-            events.push(event);
-            db.saveEvents(events);
-            
-            closeCreateEventModal();
-            loadAdminDashboard();
-            
-            alert('Event berhasil dibuat!');
+            try {
+                await db.createEvent(event);
+                closeCreateEventModal();
+                alert('✅ Event berhasil dibuat!');
+            } catch (error) {
+                console.error('Create event error:', error);
+                alert('❌ Gagal membuat event. Silakan coba lagi.');
+            }
         });
 
         function showEventDetail(eventId) {
             console.log('Opening event detail for:', eventId);
             currentEventId = eventId;
-            const events = db.getEvents();
-            const event = events.find(e => e.id === eventId);
+            const event = cachedEvents.find(e => e.id === eventId);
             
             if (!event) {
                 console.error('Event not found:', eventId);
@@ -1250,7 +1531,7 @@
 
         function loadVisitorsTable(event) {
             const tbody = document.getElementById('visitors-table-body');
-            const visitors = event.visitors || [];
+            const visitors = event.visitors ? Object.values(event.visitors) : [];
             
             document.getElementById('detail-visitors-count').textContent = visitors.length;
             
@@ -1262,7 +1543,7 @@
             tbody.innerHTML = visitors.map((visitor, index) => `
                 <tr>
                     <td class="px-4 py-3">${index + 1}</td>
-                    <td class="px-4 py-3">${formatDate(new Date(visitor.timestamp))}</td>
+                    <td class="px-4 py-3">${visitor.timestamp ? formatDate(new Date(visitor.timestamp)) : 'N/A'}</td>
                     <td class="px-4 py-3"><code class="bg-gray-100 px-2 py-1 rounded">${visitor.ipAddress}</code></td>
                     <td class="px-4 py-3">${visitor.deviceInfo.device}</td>
                     <td class="px-4 py-3">${visitor.deviceInfo.browser}</td>
