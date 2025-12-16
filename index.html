@@ -289,32 +289,6 @@
             display: flex !important;
         }
         
-        .modal-fullscreen {
-            background: linear-gradient(135deg, #0c4a6e 0%, #065f46 100%);
-        }
-        
-        /* QR Display for TV */
-        .qr-display-large {
-            background: white;
-            padding: 40px;
-            border-radius: 30px;
-            box-shadow: 0 0 100px rgba(251, 191, 36, 0.5);
-        }
-        
-        .qr-display-large canvas,
-        .qr-display-large img {
-            width: 400px !important;
-            height: 400px !important;
-        }
-        
-        @media (min-width: 1024px) {
-            .qr-display-large canvas,
-            .qr-display-large img {
-                width: 500px !important;
-                height: 500px !important;
-            }
-        }
-        
         /* Success Notification */
         .notification {
             position: fixed;
@@ -455,36 +429,20 @@
             100% { transform: scale(0) rotate(360deg); opacity: 0; }
         }
         
-        /* Sparkle */
-        .sparkle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #fbbf24;
-            border-radius: 50%;
-            animation: sparkle 1s ease-out forwards;
-            box-shadow: 0 0 10px #fbbf24;
-        }
-        
-        @keyframes sparkle {
-            0% { transform: scale(0); opacity: 1; }
-            50% { transform: scale(2); opacity: 1; }
-            100% { transform: scale(0); opacity: 0; }
-        }
-        
         /* Event Badge */
         .event-badge {
             position: absolute;
-            top: -12px;
-            right: -12px;
+            top: 8px;
+            right: 8px;
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #78350f;
-            padding: 6px 16px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
             animation: badgePulse 2s ease-in-out infinite;
+            z-index: 10;
         }
         
         @keyframes badgePulse {
@@ -512,12 +470,6 @@
                 height: 40px;
                 top: 15px;
                 right: 15px;
-            }
-            
-            .qr-display-large canvas,
-            .qr-display-large img {
-                width: 280px !important;
-                height: 280px !important;
             }
         }
         
@@ -572,12 +524,30 @@
             display: none !important;
         }
         
-        /* Countdown Timer */
-        .countdown {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
+        /* Quota Badge */
+        .quota-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .quota-full {
+            background: #fee2e2;
             color: #dc2626;
-            font-size: 1.5rem;
+        }
+        
+        .quota-low {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .quota-available {
+            background: #dcfce7;
+            color: #16a34a;
         }
     </style>
 </head>
@@ -790,7 +760,7 @@
 
         <!-- Ticket Display Screen -->
         <div id="ticket-screen" class="hidden min-h-screen flex items-center justify-center p-4">
-            <div class="card w-full max-w-md p-8 text-center ticket-float">
+            <div class="card w-full max-w-md p-8 text-center ticket-float relative">
                 <button onclick="closeTicket()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -971,56 +941,18 @@
                         placeholder="Contoh: Aula Fakultas Teknik">
                 </div>
                 
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kuota Tiket</label>
+                    <input type="number" id="event-quota" required min="1" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500"
+                        placeholder="Contoh: 100">
+                    <p class="text-xs text-gray-500 mt-1">Jumlah maksimal pengunjung yang bisa mendaftar</p>
+                </div>
+                
                 <button type="submit" class="w-full btn-primary text-white py-4 rounded-xl font-semibold text-lg">
                     <i class="fas fa-check-circle mr-2"></i>Buat Event
                 </button>
             </form>
-        </div>
-    </div>
-
-    <!-- QR Display Modal (Fullscreen for TV) -->
-    <div id="qr-display-modal" class="modal modal-fullscreen">
-        <div class="w-full h-full flex flex-col items-center justify-center p-4 relative">
-            <!-- Close Button -->
-            <button onclick="closeQRDisplay()" class="absolute top-4 right-4 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-            
-            <!-- Event Info -->
-            <div class="text-center mb-6">
-                <h2 class="text-3xl sm:text-4xl font-bold text-white mb-2" id="qr-display-event-name"></h2>
-                <p class="text-lg text-white/80" id="qr-display-event-location"></p>
-            </div>
-            
-            <!-- Large QR Code -->
-            <div class="qr-display-large mb-6">
-                <div id="qr-display-code"></div>
-            </div>
-            
-            <!-- Countdown -->
-            <div class="glass-card px-8 py-4 text-center mb-6">
-                <p class="text-white/80 text-sm mb-1">QR Code refresh dalam</p>
-                <p class="countdown text-4xl" id="qr-display-countdown">5</p>
-            </div>
-            
-            <!-- Visitor Count -->
-            <div class="glass-card px-8 py-4 text-center">
-                <p class="text-white/80 text-sm mb-1">Total Pengunjung</p>
-                <p class="text-4xl font-bold text-white" id="qr-display-visitor-count">0</p>
-            </div>
-            
-            <!-- New Visitor Notification -->
-            <div id="new-visitor-toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 glass-card px-8 py-4 hidden">
-                <div class="flex items-center gap-3">
-                    <div class="bg-green-500 p-2 rounded-full">
-                        <i class="fas fa-user-plus text-white"></i>
-                    </div>
-                    <div>
-                        <p class="text-white font-bold">Pengunjung Baru!</p>
-                        <p class="text-white/80 text-sm" id="new-visitor-device"></p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1034,7 +966,7 @@
                 </button>
             </div>
             
-            <!-- Event Info -->
+            <!-- Event Info & QR Code (Side by Side) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="space-y-3">
                     <h4 class="font-bold text-gray-700 flex items-center">
@@ -1047,22 +979,18 @@
                         <p><span class="font-semibold text-gray-600">Selesai:</span> <span id="detail-event-end" class="text-gray-800"></span></p>
                         <p><span class="font-semibold text-gray-600">Status:</span> <span id="detail-event-status"></span></p>
                         <p><span class="font-semibold text-gray-600">Kode Event:</span> <span id="detail-event-code" class="font-bold text-emerald-700"></span></p>
+                        <p><span class="font-semibold text-gray-600">Kuota:</span> <span id="detail-event-quota"></span></p>
                     </div>
                 </div>
                 
                 <div>
                     <h4 class="font-bold text-gray-700 flex items-center mb-3">
-                        <i class="fas fa-qrcode mr-2 text-emerald-600"></i>QR Code Preview
+                        <i class="fas fa-qrcode mr-2 text-emerald-600"></i>QR Code (Auto Refresh)
                     </h4>
-                    <div class="bg-gray-50 p-4 rounded-xl text-center">
-                        <div id="detail-event-qr" class="inline-block mb-2"></div>
-                        <p class="text-xs text-gray-500">Refresh: <span id="qr-countdown" class="countdown text-sm">5</span>s</p>
+                    <div class="bg-gradient-to-br from-emerald-50 to-yellow-50 p-8 rounded-2xl text-center border-2 border-dashed border-emerald-300">
+                        <div id="detail-event-qr" class="inline-block mb-3"></div>
+                        <p class="text-xs text-gray-600 mt-2"><i class="fas fa-sync-alt mr-1"></i> Refresh otomatis setiap 5 detik</p>
                     </div>
-                    
-                    <!-- Fullscreen QR Button -->
-                    <button onclick="openQRDisplay()" class="w-full mt-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 rounded-xl font-semibold transition-all">
-                        <i class="fas fa-expand mr-2"></i>Tampilkan Fullscreen (TV)
-                    </button>
                 </div>
             </div>
             
@@ -1144,6 +1072,11 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Lokasi</label>
                     <input type="text" id="edit-event-location" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kuota Tiket</label>
+                    <input type="number" id="edit-event-quota" required min="1" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500">
                 </div>
                 
                 <div class="flex gap-3">
@@ -1380,7 +1313,57 @@
             
             // Show device ID
             document.getElementById('user-device-id').textContent = db.getDeviceId();
+            
+            // Check URL hash untuk auto-join dari scan eksternal
+            checkURLHashForEventJoin();
         });
+        
+        // Handle URL hash untuk join event dari aplikasi QR eksternal
+        function checkURLHashForEventJoin() {
+            const hash = window.location.hash;
+            if (hash.startsWith('#join?')) {
+                const params = new URLSearchParams(hash.substring(6));
+                const eventId = params.get('eventId');
+                const eventCode = params.get('code');
+                const timestamp = params.get('ts');
+                
+                if (eventId && eventCode && timestamp) {
+                    // Validasi timestamp (max 6 detik)
+                    const qrTime = new Date(timestamp);
+                    const now = new Date();
+                    const diffSeconds = (now - qrTime) / 1000;
+                    
+                    if (diffSeconds > 6) {
+                        showNotification('error', 'QR Code sudah kadaluarsa! Scan yang baru.');
+                        window.location.hash = '';
+                        return;
+                    }
+                    
+                    // Tunggu events loaded
+                    setTimeout(() => {
+                        const event = cachedEvents.find(e => e.id === eventId && e.eventCode === eventCode);
+                        
+                        if (!event) {
+                            showNotification('error', 'Event tidak ditemukan!');
+                            window.location.hash = '';
+                            return;
+                        }
+                        
+                        // Check apakah sudah terdaftar
+                        if (cachedTickets.some(t => t.eventId === event.id)) {
+                            showNotification('error', 'Anda sudah terdaftar di event ini!');
+                            window.location.hash = '';
+                            return;
+                        }
+                        
+                        // Auto-register
+                        registerToEvent(event).then(() => {
+                            window.location.hash = '';
+                        });
+                    }, 1000);
+                }
+            }
+        }
 
         function createDecorations() {
             // Stars
@@ -1650,26 +1633,49 @@
         }
 
         function createEventCard(event, isPast) {
+            const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
+            const quota = event.quota || 0;
+            const available = quota - visitorsCount;
+            const percentage = quota > 0 ? (visitorsCount / quota) * 100 : 0;
+            
+            let quotaClass = 'quota-available';
+            let quotaText = `${available} tersisa`;
+            if (available === 0) {
+                quotaClass = 'quota-full';
+                quotaText = 'Penuh';
+            } else if (percentage >= 80) {
+                quotaClass = 'quota-low';
+            }
+            
             return `
                 <div class="card p-5 ${isPast ? 'opacity-60' : ''}">
                     <div class="flex items-start gap-3 mb-4">
                         <div class="bg-gradient-to-br ${isPast ? 'from-gray-400 to-gray-600' : 'from-blue-500 to-blue-700'} p-3 rounded-xl shrink-0">
                             <i class="fas ${isPast ? 'fa-calendar-times' : 'fa-calendar-plus'} text-xl text-white"></i>
                         </div>
-                        <div class="min-w-0">
+                        <div class="min-w-0 flex-1">
                             <h4 class="font-bold text-gray-800 truncate">${event.name}</h4>
                             <p class="text-sm text-gray-500 truncate">${event.description}</p>
                         </div>
                     </div>
                     
-                    <div class="space-y-1.5 text-sm text-gray-600 mb-4">
+                    <div class="space-y-1.5 text-sm text-gray-600 mb-3">
                         <p class="flex items-center"><i class="fas fa-map-marker-alt mr-2 ${isPast ? 'text-gray-400' : 'text-blue-500'} w-4"></i><span class="truncate">${event.location}</span></p>
                         <p class="flex items-center"><i class="fas fa-calendar mr-2 ${isPast ? 'text-gray-400' : 'text-blue-500'} w-4"></i>${formatDate(new Date(event.startDate))}</p>
                     </div>
                     
-                    <div class="text-center py-3 ${isPast ? 'bg-gray-100 text-gray-500' : 'bg-blue-50 text-blue-600'} rounded-xl text-sm">
-                        <i class="fas ${isPast ? 'fa-clock' : 'fa-qrcode'} mr-2"></i>
-                        ${isPast ? 'Event Telah Berakhir' : 'Scan QR untuk bergabung'}
+                    ${!isPast && quota > 0 ? `
+                        <div class="mb-3">
+                            <span class="quota-badge ${quotaClass}">
+                                <i class="fas fa-users"></i>
+                                ${quotaText}
+                            </span>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="text-center py-3 ${isPast ? 'bg-gray-100 text-gray-500' : available > 0 ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'} rounded-xl text-sm">
+                        <i class="fas ${isPast ? 'fa-clock' : available > 0 ? 'fa-qrcode' : 'fa-ban'} mr-2"></i>
+                        ${isPast ? 'Event Telah Berakhir' : available > 0 ? 'Scan QR untuk bergabung' : 'Kuota Penuh'}
                     </div>
                 </div>
             `;
@@ -1879,30 +1885,77 @@
 
         async function onScanSuccess(decodedText) {
             try {
-                const data = JSON.parse(decodedText);
-                if (data.type !== 'event-qr') throw new Error('Invalid QR');
-                
-                const event = cachedEvents.find(e => e.id === data.eventId);
-                if (!event) throw new Error('Event tidak ditemukan');
-                
-                // Check expiry (5 seconds)
-                const qrTime = new Date(data.timestamp);
-                if ((new Date() - qrTime) / 1000 > 6) {
-                    showNotification('error', 'QR Code expired! Scan yang baru.');
-                    return;
+                // Try to parse as JSON first (dari scanner website)
+                try {
+                    const data = JSON.parse(decodedText);
+                    if (data.type === 'event-qr') {
+                        await processQRData(data.eventId, data.timestamp);
+                        return;
+                    }
+                } catch (jsonError) {
+                    // Not JSON, try as URL (dari aplikasi QR eksternal)
                 }
                 
-                if (cachedTickets.some(t => t.eventId === event.id)) {
-                    showNotification('error', 'Anda sudah terdaftar!');
-                    closeScanner();
-                    return;
+                // Try to parse as URL
+                if (decodedText.includes('#join?')) {
+                    const url = new URL(decodedText);
+                    const hash = url.hash;
+                    const params = new URLSearchParams(hash.substring(6));
+                    const eventId = params.get('eventId');
+                    const eventCode = params.get('code');
+                    const timestamp = params.get('ts');
+                    
+                    if (eventId && eventCode && timestamp) {
+                        await processQRData(eventId, timestamp, eventCode);
+                        return;
+                    }
                 }
                 
-                await registerToEvent(event);
-                closeScanner();
+                throw new Error('Invalid QR format');
             } catch (e) {
                 showNotification('error', 'QR Code tidak valid!');
             }
+        }
+        
+        async function processQRData(eventId, timestamp, eventCode = null) {
+            const event = cachedEvents.find(e => {
+                if (eventCode) {
+                    return e.id === eventId && e.eventCode === eventCode;
+                }
+                return e.id === eventId;
+            });
+            
+            if (!event) {
+                showNotification('error', 'Event tidak ditemukan');
+                return;
+            }
+            
+            // Check expiry (6 seconds)
+            const qrTime = new Date(timestamp);
+            const diffSeconds = (new Date() - qrTime) / 1000;
+            
+            if (diffSeconds > 6) {
+                showNotification('error', 'QR Code kadaluarsa! Scan yang baru.');
+                return;
+            }
+            
+            // Check kuota
+            const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
+            const quota = event.quota || 0;
+            if (quota > 0 && visitorsCount >= quota) {
+                showNotification('error', 'Kuota event sudah penuh!');
+                closeScanner();
+                return;
+            }
+            
+            if (cachedTickets.some(t => t.eventId === event.id)) {
+                showNotification('error', 'Anda sudah terdaftar!');
+                closeScanner();
+                return;
+            }
+            
+            await registerToEvent(event);
+            closeScanner();
         }
 
         async function registerToEvent(event) {
@@ -1913,6 +1966,14 @@
                 const exists = await db.checkVisitorExists(event.id, deviceId);
                 if (exists) {
                     showNotification('error', 'Device sudah terdaftar!');
+                    return;
+                }
+                
+                // Check kuota lagi sebelum register
+                const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
+                const quota = event.quota || 0;
+                if (quota > 0 && visitorsCount >= quota) {
+                    showNotification('error', 'Kuota event sudah penuh!');
                     return;
                 }
                 
@@ -1996,6 +2057,7 @@
                 const now = new Date();
                 const isActive = new Date(event.endDate) > now;
                 const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
+                const quota = event.quota || 0;
                 
                 return `
                     <div class="border border-gray-200 rounded-xl p-4 hover:shadow-lg hover:border-emerald-400 transition-all cursor-pointer" onclick="showEventDetail('${event.id}')">
@@ -2007,7 +2069,7 @@
                             </div>
                             <div class="flex items-center gap-4 ml-4">
                                 <div class="text-center">
-                                    <p class="text-2xl font-bold text-gray-800">${visitorsCount}</p>
+                                    <p class="text-2xl font-bold text-gray-800">${visitorsCount}${quota > 0 ? '/' + quota : ''}</p>
                                     <p class="text-xs text-gray-500">Pengunjung</p>
                                 </div>
                                 <div class="${isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} px-3 py-1 rounded-full text-xs font-bold">
@@ -2041,7 +2103,8 @@
                 description: document.getElementById('event-description').value,
                 startDate: document.getElementById('event-start').value,
                 endDate: document.getElementById('event-end').value,
-                location: document.getElementById('event-location').value
+                location: document.getElementById('event-location').value,
+                quota: parseInt(document.getElementById('event-quota').value)
             };
             
             try {
@@ -2060,6 +2123,8 @@
             
             const now = new Date();
             const isActive = new Date(event.endDate) > now;
+            const visitorsCount = event.visitors ? Object.keys(event.visitors).length : 0;
+            const quota = event.quota || 0;
             
             document.getElementById('detail-event-name').textContent = event.name;
             document.getElementById('detail-event-desc').textContent = event.description;
@@ -2070,11 +2135,14 @@
             document.getElementById('detail-event-status').innerHTML = isActive ? 
                 '<span class="text-green-600 font-bold">AKTIF</span>' : 
                 '<span class="text-gray-500 font-bold">SELESAI</span>';
+            document.getElementById('detail-event-quota').innerHTML = quota > 0 ? 
+                `<span class="font-bold ${visitorsCount >= quota ? 'text-red-600' : 'text-emerald-700'}">${visitorsCount}/${quota}</span>` : 
+                '<span class="text-gray-500">Tidak ada limit</span>';
             
             loadVisitorsTable(event);
             
             // Listen for real-time visitor updates
-            previousVisitorCount = event.visitors ? Object.keys(event.visitors).length : 0;
+            previousVisitorCount = visitorsCount;
             db.onEventVisitorsChange(eventId, visitors => {
                 const event = cachedEvents.find(e => e.id === eventId);
                 if (event) {
@@ -2082,17 +2150,18 @@
                     visitors.forEach(v => { event.visitors[v.deviceId] = v; });
                     loadVisitorsTable(event);
                     
+                    // Update quota display
+                    const newCount = visitors.length;
+                    document.getElementById('detail-event-quota').innerHTML = quota > 0 ? 
+                        `<span class="font-bold ${newCount >= quota ? 'text-red-600' : 'text-emerald-700'}">${newCount}/${quota}</span>` : 
+                        '<span class="text-gray-500">Tidak ada limit</span>';
+                    
                     // Check for new visitor
                     if (visitors.length > previousVisitorCount) {
                         const newVisitor = visitors[visitors.length - 1];
-                        showNewVisitorNotification(newVisitor);
+                        showNotification('success', '🎉 Pengunjung baru: ' + (newVisitor.deviceInfo?.device || 'Device'));
                     }
                     previousVisitorCount = visitors.length;
-                    
-                    // Update fullscreen display if open
-                    if (document.getElementById('qr-display-modal').classList.contains('active')) {
-                        document.getElementById('qr-display-visitor-count').textContent = visitors.length;
-                    }
                 }
             });
             
@@ -2133,73 +2202,37 @@
             `).join('');
         }
 
-        function showNewVisitorNotification(visitor) {
-            // Show toast in fullscreen QR display
-            const toast = document.getElementById('new-visitor-toast');
-            document.getElementById('new-visitor-device').textContent = visitor.deviceInfo?.device || 'Device baru';
-            toast.classList.remove('hidden');
-            
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-            
-            // Also show general notification
-            showNotification('success', '🎉 Pengunjung baru: ' + (visitor.deviceInfo?.device || 'Device'));
-        }
-
         // QR Refresh
-        let eventQRCode = null;
-        
         function startQRRefresh(event) {
             stopQRRefresh();
-            let countdown = 5;
             
             function generateQR() {
-                const qrData = {
-                    type: 'event-qr',
-                    eventId: event.id,
-                    timestamp: new Date().toISOString()
-                };
+                const timestamp = new Date().toISOString();
+                // URL untuk scan dari aplikasi eksternal
+                const currentURL = window.location.origin + window.location.pathname;
+                const qrURL = `${currentURL}#join?eventId=${event.id}&code=${event.eventCode}&ts=${encodeURIComponent(timestamp)}`;
                 
-                // Small QR in detail modal
+                // Large QR in detail modal
                 const qrContainer = document.getElementById('detail-event-qr');
-                qrContainer.innerHTML = '';
-                new QRCode(qrContainer, {
-                    text: JSON.stringify(qrData),
-                    width: 150,
-                    height: 150,
-                    colorDark: "#047857",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-                
-                // Large QR in fullscreen
-                const qrDisplayContainer = document.getElementById('qr-display-code');
-                if (qrDisplayContainer) {
-                    qrDisplayContainer.innerHTML = '';
-                    new QRCode(qrDisplayContainer, {
-                        text: JSON.stringify(qrData),
-                        width: 400,
-                        height: 400,
+                if (qrContainer) {
+                    qrContainer.innerHTML = '';
+                    new QRCode(qrContainer, {
+                        text: qrURL,
+                        width: 300,
+                        height: 300,
                         colorDark: "#047857",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
                     });
                 }
-                
-                countdown = 5;
             }
             
             generateQR();
             
+            // Refresh QR setiap 5 detik
             qrRefreshInterval = setInterval(() => {
-                countdown--;
-                document.getElementById('qr-countdown').textContent = countdown;
-                const displayCountdown = document.getElementById('qr-display-countdown');
-                if (displayCountdown) displayCountdown.textContent = countdown;
-                
-                if (countdown <= 0) generateQR();
-            }, 1000);
+                generateQR();
+            }, 5000);
         }
 
         function stopQRRefresh() {
@@ -2207,40 +2240,6 @@
                 clearInterval(qrRefreshInterval);
                 qrRefreshInterval = null;
             }
-        }
-
-        // Fullscreen QR Display
-        function openQRDisplay() {
-            const event = cachedEvents.find(e => e.id === currentEventId);
-            if (!event) return;
-            
-            document.getElementById('qr-display-event-name').textContent = event.name;
-            document.getElementById('qr-display-event-location').textContent = event.location;
-            document.getElementById('qr-display-visitor-count').textContent = event.visitors ? Object.keys(event.visitors).length : 0;
-            
-            document.getElementById('qr-display-modal').classList.add('active');
-            
-            // Regenerate large QR
-            const qrData = {
-                type: 'event-qr',
-                eventId: event.id,
-                timestamp: new Date().toISOString()
-            };
-            
-            const container = document.getElementById('qr-display-code');
-            container.innerHTML = '';
-            new QRCode(container, {
-                text: JSON.stringify(qrData),
-                width: 400,
-                height: 400,
-                colorDark: "#047857",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
-
-        function closeQRDisplay() {
-            document.getElementById('qr-display-modal').classList.remove('active');
         }
 
         // Edit Event
@@ -2253,6 +2252,7 @@
             document.getElementById('edit-event-start').value = event.startDate;
             document.getElementById('edit-event-end').value = event.endDate;
             document.getElementById('edit-event-location').value = event.location;
+            document.getElementById('edit-event-quota').value = event.quota || 0;
             
             document.getElementById('edit-event-modal').classList.add('active');
         }
@@ -2269,7 +2269,8 @@
                 description: document.getElementById('edit-event-description').value,
                 startDate: document.getElementById('edit-event-start').value,
                 endDate: document.getElementById('edit-event-end').value,
-                location: document.getElementById('edit-event-location').value
+                location: document.getElementById('edit-event-location').value,
+                quota: parseInt(document.getElementById('edit-event-quota').value)
             };
             
             try {
