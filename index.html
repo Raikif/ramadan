@@ -294,6 +294,165 @@
             font-weight: bold;
             color: #dc2626;
         }
+
+        /* Text Shadow for visibility */
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Celebration Animation */
+        .celebration-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .celebration-content {
+            text-align: center;
+            animation: celebrationPop 0.5s ease-out;
+        }
+
+        @keyframes celebrationPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .checkmark-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: checkPulse 1s ease-in-out infinite;
+            box-shadow: 0 0 60px rgba(16, 185, 129, 0.6);
+        }
+
+        @keyframes checkPulse {
+            0%, 100% { box-shadow: 0 0 60px rgba(16, 185, 129, 0.6); }
+            50% { box-shadow: 0 0 100px rgba(16, 185, 129, 0.9); }
+        }
+
+        .checkmark {
+            font-size: 80px;
+            color: white;
+            animation: checkBounce 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes checkBounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Firework */
+        .firework {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: fireworkExplode 1s ease-out forwards;
+        }
+
+        @keyframes fireworkExplode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(20); opacity: 0; }
+        }
+
+        /* Stars burst */
+        .star-burst {
+            position: absolute;
+            font-size: 30px;
+            animation: starBurst 1.5s ease-out forwards;
+        }
+
+        @keyframes starBurst {
+            0% { transform: scale(0) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        /* Sparkle effect */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: sparkle 0.8s ease-out forwards;
+        }
+
+        @keyframes sparkle {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(2); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Ticket completed style */
+        .ticket-completed {
+            opacity: 0.6;
+            filter: grayscale(50%);
+            pointer-events: none;
+        }
+
+        .ticket-completed::after {
+            content: 'SELESAI';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+            background: #dc2626;
+            color: white;
+            padding: 10px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.5);
+        }
+
+        /* Event Card Badge */
+        .event-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #78350f;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.5);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
     </style>
 </head>
 <body class="islamic-pattern">
@@ -379,25 +538,49 @@
                     </div>
                 </div>
 
-                <!-- Active Events -->
+                <!-- My Active Tickets -->
                 <div class="mb-4 sm:mb-6">
-                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
-                        <i class="fas fa-calendar-check mr-2 text-yellow-400"></i>
-                        Event Aktif
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center text-shadow">
+                        <i class="fas fa-ticket-alt mr-2 text-yellow-400"></i>
+                        Tiket Aktif Saya
+                        <span class="ml-2 bg-yellow-500 text-yellow-900 text-xs px-2 py-1 rounded-full" id="active-ticket-count">0</span>
                     </h3>
-                    <div id="active-events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        <!-- Events will be populated here -->
+                    <div id="active-tickets" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <!-- Active tickets will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Completed Tickets -->
+                <div class="mb-4 sm:mb-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center text-shadow">
+                        <i class="fas fa-check-circle mr-2 text-yellow-400"></i>
+                        Tiket Selesai
+                        <span class="ml-2 bg-gray-500 text-white text-xs px-2 py-1 rounded-full" id="completed-ticket-count">0</span>
+                    </h3>
+                    <div id="completed-tickets" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <!-- Completed tickets will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Available Events -->
+                <div class="mb-4 sm:mb-6">
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center text-shadow">
+                        <i class="fas fa-calendar-alt mr-2 text-yellow-400"></i>
+                        Event Tersedia
+                    </h3>
+                    <div id="available-events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                        <!-- Available events will be populated here -->
                     </div>
                 </div>
 
                 <!-- Past Events -->
                 <div>
-                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center">
+                    <h3 class="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 flex items-center text-shadow">
                         <i class="fas fa-history mr-2 text-yellow-400"></i>
-                        Event Selesai
+                        Event Berakhir
                     </h3>
                     <div id="past-events" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                        <!-- Events will be populated here -->
+                        <!-- Past events will be populated here -->
                     </div>
                 </div>
             </div>
@@ -513,9 +696,13 @@
                     <p class="text-xs text-yellow-700 mt-2">Jangan klik tombol "Selesai" sebelum verifikasi</p>
                 </div>
 
-                <button onclick="closeTicket()" class="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-xl font-semibold transition-all">
-                    <i class="fas fa-times mr-2"></i>Selesai
+                <button onclick="completeTicket()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-check-circle mr-2"></i>Selesai & Verifikasi
                 </button>
+                <p class="text-xs text-gray-500 mt-3 text-center">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Klik tombol ini HANYA setelah petugas memverifikasi tiket Anda
+                </p>
             </div>
         </div>
     </div>
@@ -667,6 +854,21 @@
                     <i class="fas fa-times mr-2"></i>Tutup
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Celebration Overlay -->
+    <div id="celebration-overlay" class="celebration-overlay" style="display: none;">
+        <div id="confetti-container"></div>
+        <div class="celebration-content">
+            <div class="checkmark-circle">
+                <i class="fas fa-check checkmark"></i>
+            </div>
+            <h2 class="text-4xl sm:text-5xl font-bold text-white mb-4">Terima Kasih!</h2>
+            <p class="text-xl sm:text-2xl text-emerald-400 mb-2">Jazakallahu Khairan</p>
+            <p class="text-lg text-gray-300 mb-6">Tiket berhasil diverifikasi</p>
+            <div class="text-6xl mb-6">🎉🌙✨</div>
+            <p class="text-sm text-gray-400">Semoga mendapat keberkahan di bulan Ramadhan</p>
         </div>
     </div>
 
@@ -935,64 +1137,165 @@
             const userTickets = cachedTickets;
             const now = new Date();
             
-            const activeEvents = events.filter(e => new Date(e.endDate) > now);
+            // Separate tickets by status
+            const activeTickets = userTickets.filter(t => {
+                const event = events.find(e => e.id === t.eventId);
+                return event && !t.completed && new Date(event.endDate) > now;
+            });
+            
+            const completedTickets = userTickets.filter(t => t.completed);
+            
+            // Events user hasn't joined yet (active)
+            const availableEvents = events.filter(e => {
+                const hasTicket = userTickets.some(t => t.eventId === e.id);
+                return !hasTicket && new Date(e.endDate) > now;
+            });
+            
+            // Past events
             const pastEvents = events.filter(e => new Date(e.endDate) <= now);
             
-            const activeEventsContainer = document.getElementById('active-events');
+            // Get containers
+            const activeTicketsContainer = document.getElementById('active-tickets');
+            const completedTicketsContainer = document.getElementById('completed-tickets');
+            const availableEventsContainer = document.getElementById('available-events');
             const pastEventsContainer = document.getElementById('past-events');
             
-            if (!activeEventsContainer || !pastEventsContainer) return;
+            if (!activeTicketsContainer) return;
             
-            activeEventsContainer.innerHTML = '';
-            pastEventsContainer.innerHTML = '';
+            // Update counts
+            document.getElementById('active-ticket-count').textContent = activeTickets.length;
+            document.getElementById('completed-ticket-count').textContent = completedTickets.length;
+            document.getElementById('total-tickets').textContent = userTickets.length;
             
-            if (activeEvents.length === 0) {
-                activeEventsContainer.innerHTML = '<p class="text-white text-center col-span-full">Belum ada event aktif</p>';
+            // Render Active Tickets
+            if (activeTickets.length === 0) {
+                activeTicketsContainer.innerHTML = '<div class="card p-6 col-span-full text-center"><p class="text-gray-500"><i class="fas fa-ticket-alt text-4xl mb-3 text-gray-300"></i><br>Belum punya tiket aktif<br><span class="text-sm">Scan QR Code event untuk mendapatkan tiket</span></p></div>';
             } else {
-                activeEvents.forEach(event => {
-                    const hasTicket = userTickets.some(t => t.eventId === event.id);
-                    activeEventsContainer.innerHTML += createEventCard(event, hasTicket);
-                });
+                activeTicketsContainer.innerHTML = activeTickets.map(ticket => {
+                    const event = events.find(e => e.id === ticket.eventId);
+                    if (!event) return '';
+                    return createTicketCard(event, ticket, false);
+                }).join('');
             }
             
-            if (pastEvents.length === 0) {
-                pastEventsContainer.innerHTML = '<p class="text-white text-center col-span-full">Belum ada event selesai</p>';
+            // Render Completed Tickets
+            if (completedTickets.length === 0) {
+                completedTicketsContainer.innerHTML = '<div class="card p-6 col-span-full text-center"><p class="text-gray-500"><i class="fas fa-check-circle text-4xl mb-3 text-gray-300"></i><br>Belum ada tiket selesai</p></div>';
             } else {
-                pastEvents.forEach(event => {
-                    pastEventsContainer.innerHTML += createEventCard(event, true, true);
-                });
+                completedTicketsContainer.innerHTML = completedTickets.map(ticket => {
+                    const event = events.find(e => e.id === ticket.eventId);
+                    if (!event) return '';
+                    return createTicketCard(event, ticket, true);
+                }).join('');
+            }
+            
+            // Render Available Events
+            if (availableEvents.length === 0) {
+                availableEventsContainer.innerHTML = '<div class="card p-6 col-span-full text-center"><p class="text-gray-500"><i class="fas fa-calendar-alt text-4xl mb-3 text-gray-300"></i><br>Tidak ada event tersedia</p></div>';
+            } else {
+                availableEventsContainer.innerHTML = availableEvents.map(event => createAvailableEventCard(event)).join('');
+            }
+            
+            // Render Past Events
+            if (pastEvents.length === 0) {
+                pastEventsContainer.innerHTML = '<div class="card p-6 col-span-full text-center"><p class="text-gray-500"><i class="fas fa-history text-4xl mb-3 text-gray-300"></i><br>Belum ada event berakhir</p></div>';
+            } else {
+                pastEventsContainer.innerHTML = pastEvents.map(event => createPastEventCard(event)).join('');
             }
         }
-
-        function createEventCard(event, hasTicket, isPast = false) {
+        
+        function createTicketCard(event, ticket, isCompleted) {
             const startDate = new Date(event.startDate);
-            const endDate = new Date(event.endDate);
             
             return `
-                <div class="card p-6 ${isPast ? 'opacity-60' : ''} scroll-fade-in">
-                    <div class="flex items-start justify-between mb-4">
+                <div class="card p-6 relative overflow-hidden ${isCompleted ? 'opacity-70' : ''}" style="position: relative;">
+                    ${isCompleted ? '<div class="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold"><i class="fas fa-check mr-1"></i>SELESAI</div>' : '<div class="event-badge"><i class="fas fa-star mr-1"></i>AKTIF</div>'}
+                    
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="bg-gradient-to-br ${isCompleted ? 'from-gray-400 to-gray-600' : 'from-emerald-500 to-emerald-700'} p-3 rounded-xl">
+                            <i class="fas fa-ticket-alt text-2xl text-white"></i>
+                        </div>
                         <div class="flex-1">
                             <h4 class="text-lg font-bold text-gray-800 mb-1">${event.name}</h4>
-                            <p class="text-sm text-gray-600 mb-2">${event.description}</p>
+                            <p class="text-sm text-gray-600">${event.description}</p>
                         </div>
-                        ${hasTicket ? '<div class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold"><i class="fas fa-check mr-1"></i>Terdaftar</div>' : ''}
                     </div>
                     
                     <div class="space-y-2 text-sm text-gray-600 mb-4">
                         <p><i class="fas fa-map-marker-alt mr-2 text-emerald-600"></i>${event.location}</p>
-                        <p><i class="fas fa-calendar mr-2 text-emerald-600"></i>${formatDate(startDate)} - ${formatDate(endDate)}</p>
+                        <p><i class="fas fa-calendar mr-2 text-emerald-600"></i>${formatDate(startDate)}</p>
+                        <p><i class="fas fa-key mr-2 text-yellow-600"></i>Kode: <span class="font-bold text-emerald-700">${event.eventCode || 'N/A'}</span></p>
                     </div>
                     
-                    ${hasTicket && !isPast ? `
-                        <button onclick="showTicket('${event.id}')" class="w-full btn-primary text-white py-2 px-4 rounded-lg font-semibold">
-                            <i class="fas fa-ticket-alt mr-2"></i>Lihat Tiket
+                    ${!isCompleted ? `
+                        <button onclick="showTicket('${event.id}')" class="w-full btn-primary text-white py-3 px-4 rounded-xl font-semibold">
+                            <i class="fas fa-qrcode mr-2"></i>Buka Tiket
                         </button>
-                    ` : ''}
-                    
-                    ${isPast ? '<div class="text-center text-gray-500 text-sm"><i class="fas fa-check-circle mr-2"></i>Event Selesai</div>' : ''}
+                    ` : `
+                        <div class="text-center py-3 bg-gray-100 rounded-xl text-gray-500">
+                            <i class="fas fa-check-circle mr-2"></i>Tiket Sudah Digunakan
+                        </div>
+                    `}
                 </div>
             `;
         }
+        
+        function createAvailableEventCard(event) {
+            const startDate = new Date(event.startDate);
+            
+            return `
+                <div class="card p-6 relative">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-700 p-3 rounded-xl">
+                            <i class="fas fa-calendar-plus text-2xl text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-gray-800 mb-1">${event.name}</h4>
+                            <p class="text-sm text-gray-600">${event.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-600 mb-4">
+                        <p><i class="fas fa-map-marker-alt mr-2 text-blue-600"></i>${event.location}</p>
+                        <p><i class="fas fa-calendar mr-2 text-blue-600"></i>${formatDate(startDate)}</p>
+                    </div>
+                    
+                    <div class="text-center py-3 bg-blue-50 rounded-xl text-blue-600 text-sm">
+                        <i class="fas fa-qrcode mr-2"></i>Scan QR untuk bergabung
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createPastEventCard(event) {
+            const startDate = new Date(event.startDate);
+            
+            return `
+                <div class="card p-6 opacity-60">
+                    <div class="flex items-start gap-4 mb-4">
+                        <div class="bg-gradient-to-br from-gray-400 to-gray-600 p-3 rounded-xl">
+                            <i class="fas fa-calendar-times text-2xl text-white"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold text-gray-800 mb-1">${event.name}</h4>
+                            <p class="text-sm text-gray-600">${event.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2 text-sm text-gray-600">
+                        <p><i class="fas fa-map-marker-alt mr-2 text-gray-500"></i>${event.location}</p>
+                        <p><i class="fas fa-calendar mr-2 text-gray-500"></i>${formatDate(startDate)}</p>
+                    </div>
+                    
+                    <div class="mt-4 text-center py-2 bg-gray-100 rounded-xl text-gray-500 text-sm">
+                        <i class="fas fa-clock mr-2"></i>Event Telah Berakhir
+                    </div>
+                </div>
+            `;
+        }
+
+        // Variable for current ticket being viewed
+        let currentTicketEventId = null;
 
         function formatDate(date) {
             const options = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -1281,17 +1584,28 @@
             
             if (!event || !ticket) return;
             
+            // Check if ticket is already completed
+            if (ticket.completed) {
+                alert('Tiket ini sudah digunakan!');
+                return;
+            }
+            
+            currentTicketEventId = eventId;
+            
             document.getElementById('ticket-event-name').textContent = event.name;
             document.getElementById('ticket-event-date').textContent = formatDate(new Date(event.startDate));
-            document.getElementById('ticket-unique-code').textContent = ticket.ticketCode;
             
-            // Generate QR code for ticket
+            // Use EVENT CODE, not ticket code
+            const eventCode = event.eventCode || generateEventCode(event.id);
+            document.getElementById('ticket-unique-code').textContent = eventCode;
+            
+            // Generate QR code for event code
             const qrContainer = document.getElementById('ticket-qr-code');
             qrContainer.innerHTML = '';
             
             try {
                 ticketQRCode = new QRCode(qrContainer, {
-                    text: ticket.ticketCode,
+                    text: `EVENT:${eventCode}|USER:${db.getDeviceId()}`,
                     width: 180,
                     height: 180,
                     colorDark: "#047857",
@@ -1305,8 +1619,123 @@
             document.getElementById('user-dashboard').classList.add('hidden');
             document.getElementById('ticket-screen').classList.remove('hidden');
         }
+        
+        function generateEventCode(eventId) {
+            return eventId.replace('evt-', 'EVT-').substring(0, 12).toUpperCase();
+        }
 
         function closeTicket() {
+            currentTicketEventId = null;
+            document.getElementById('ticket-screen').classList.add('hidden');
+            document.getElementById('user-dashboard').classList.remove('hidden');
+        }
+        
+        async function completeTicket() {
+            if (!currentTicketEventId) return;
+            
+            const confirmComplete = confirm('Apakah petugas sudah memverifikasi tiket Anda?\n\nKlik OK jika sudah diverifikasi.\nTiket tidak dapat digunakan lagi setelah ini.');
+            
+            if (!confirmComplete) return;
+            
+            try {
+                // Update ticket status to completed
+                const deviceId = db.getDeviceId();
+                await db.ticketsRef.child(deviceId).child(currentTicketEventId).update({
+                    completed: true,
+                    completedAt: firebase.database.ServerValue.TIMESTAMP
+                });
+                
+                // Show celebration animation
+                showCelebration();
+                
+            } catch (error) {
+                console.error('Complete ticket error:', error);
+                alert('Gagal menyelesaikan tiket. Coba lagi.');
+            }
+        }
+        
+        function showCelebration() {
+            const overlay = document.getElementById('celebration-overlay');
+            const confettiContainer = document.getElementById('confetti-container');
+            
+            overlay.style.display = 'flex';
+            confettiContainer.innerHTML = '';
+            
+            // Create confetti
+            const colors = ['#fbbf24', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899', '#f97316'];
+            
+            for (let i = 0; i < 150; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                
+                // Random shapes
+                const shapes = ['circle', 'square', 'triangle'];
+                const shape = shapes[Math.floor(Math.random() * shapes.length)];
+                if (shape === 'circle') {
+                    confetti.style.borderRadius = '50%';
+                } else if (shape === 'triangle') {
+                    confetti.style.width = '0';
+                    confetti.style.height = '0';
+                    confetti.style.borderLeft = '5px solid transparent';
+                    confetti.style.borderRight = '5px solid transparent';
+                    confetti.style.borderBottom = '10px solid ' + colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.background = 'transparent';
+                }
+                
+                confettiContainer.appendChild(confetti);
+            }
+            
+            // Create fireworks
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const firework = document.createElement('div');
+                    firework.className = 'firework';
+                    firework.style.left = (20 + Math.random() * 60) + '%';
+                    firework.style.top = (20 + Math.random() * 40) + '%';
+                    firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confettiContainer.appendChild(firework);
+                }, i * 200);
+            }
+            
+            // Create star bursts
+            const starEmojis = ['⭐', '🌟', '✨', '💫', '🎉', '🎊', '🌙'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const star = document.createElement('div');
+                    star.className = 'star-burst';
+                    star.textContent = starEmojis[Math.floor(Math.random() * starEmojis.length)];
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    confettiContainer.appendChild(star);
+                }, i * 100);
+            }
+            
+            // Create sparkles
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'sparkle';
+                    sparkle.style.left = Math.random() * 100 + '%';
+                    sparkle.style.top = Math.random() * 100 + '%';
+                    confettiContainer.appendChild(sparkle);
+                }, i * 50);
+            }
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                closeCelebration();
+            }, 5000);
+        }
+        
+        function closeCelebration() {
+            const overlay = document.getElementById('celebration-overlay');
+            overlay.style.display = 'none';
+            
+            currentTicketEventId = null;
             document.getElementById('ticket-screen').classList.add('hidden');
             document.getElementById('user-dashboard').classList.remove('hidden');
         }
@@ -1407,18 +1836,22 @@
         document.getElementById('create-event-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Generate unique event code
+            const eventCode = 'EVT-' + Date.now().toString(36).toUpperCase().substring(0, 6) + '-' + Math.random().toString(36).substring(2, 5).toUpperCase();
+            
             const event = {
                 name: document.getElementById('event-name').value,
                 description: document.getElementById('event-description').value,
                 startDate: document.getElementById('event-start').value,
                 endDate: document.getElementById('event-end').value,
-                location: document.getElementById('event-location').value
+                location: document.getElementById('event-location').value,
+                eventCode: eventCode
             };
             
             try {
                 await db.createEvent(event);
                 closeCreateEventModal();
-                alert('✅ Event berhasil dibuat!');
+                alert('✅ Event berhasil dibuat!\n\nKode Event: ' + eventCode);
             } catch (error) {
                 console.error('Create event error:', error);
                 alert('❌ Gagal membuat event. Silakan coba lagi.');
@@ -1572,32 +2005,36 @@
             a.click();
         }
 
-        function deleteEvent() {
-            if (!confirm('Apakah Anda yakin ingin menghapus event ini? Semua data pengunjung juga akan terhapus!')) return;
+        async function deleteEvent() {
+            if (!confirm('Apakah Anda yakin ingin menghapus event ini?\n\nSemua data pengunjung juga akan terhapus!\nTindakan ini tidak dapat dibatalkan.')) return;
             
-            const events = db.getEvents();
-            const filteredEvents = events.filter(e => e.id !== currentEventId);
-            db.saveEvents(filteredEvents);
-            
-            closeEventDetailModal();
-            loadAdminDashboard();
-            
-            alert('Event berhasil dihapus!');
+            try {
+                await db.deleteEvent(currentEventId);
+                
+                closeEventDetailModal();
+                
+                alert('✅ Event berhasil dihapus!');
+            } catch (error) {
+                console.error('Delete event error:', error);
+                alert('❌ Gagal menghapus event. Coba lagi.');
+            }
         }
 
         // Edit Event Functions
         function openEditEventModal() {
-            const events = db.getEvents();
-            const event = events.find(e => e.id === currentEventId);
+            const event = cachedEvents.find(e => e.id === currentEventId);
             
-            if (!event) return;
+            if (!event) {
+                alert('Event tidak ditemukan!');
+                return;
+            }
             
             // Populate form with current event data
-            document.getElementById('edit-event-name').value = event.name;
-            document.getElementById('edit-event-description').value = event.description;
-            document.getElementById('edit-event-start').value = event.startDate;
-            document.getElementById('edit-event-end').value = event.endDate;
-            document.getElementById('edit-event-location').value = event.location;
+            document.getElementById('edit-event-name').value = event.name || '';
+            document.getElementById('edit-event-description').value = event.description || '';
+            document.getElementById('edit-event-start').value = event.startDate || '';
+            document.getElementById('edit-event-end').value = event.endDate || '';
+            document.getElementById('edit-event-location').value = event.location || '';
             
             document.getElementById('edit-event-modal').classList.add('active');
         }
@@ -1607,32 +2044,29 @@
             document.getElementById('edit-event-form').reset();
         }
 
-        document.getElementById('edit-event-form').addEventListener('submit', function(e) {
+        document.getElementById('edit-event-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const events = db.getEvents();
-            const eventIndex = events.findIndex(e => e.id === currentEventId);
+            const updatedData = {
+                name: document.getElementById('edit-event-name').value,
+                description: document.getElementById('edit-event-description').value,
+                startDate: document.getElementById('edit-event-start').value,
+                endDate: document.getElementById('edit-event-end').value,
+                location: document.getElementById('edit-event-location').value,
+                updatedAt: new Date().toISOString()
+            };
             
-            if (eventIndex === -1) {
-                alert('Event tidak ditemukan!');
-                return;
+            try {
+                await db.updateEvent(currentEventId, updatedData);
+                
+                closeEditEventModal();
+                closeEventDetailModal();
+                
+                alert('✅ Event berhasil diperbarui!');
+            } catch (error) {
+                console.error('Update event error:', error);
+                alert('❌ Gagal memperbarui event. Coba lagi.');
             }
-            
-            // Update event data
-            events[eventIndex].name = document.getElementById('edit-event-name').value;
-            events[eventIndex].description = document.getElementById('edit-event-description').value;
-            events[eventIndex].startDate = document.getElementById('edit-event-start').value;
-            events[eventIndex].endDate = document.getElementById('edit-event-end').value;
-            events[eventIndex].location = document.getElementById('edit-event-location').value;
-            events[eventIndex].updatedAt = new Date().toISOString();
-            
-            db.saveEvents(events);
-            
-            closeEditEventModal();
-            closeEventDetailModal();
-            loadAdminDashboard();
-            
-            alert('Event berhasil diperbarui!');
         });
 
         // Scroll animations
