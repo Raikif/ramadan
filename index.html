@@ -771,12 +771,42 @@
                 </button>
 
                 <!-- Events List -->
-                <div class="card p-6">
+                <div class="card p-6 mb-6">
                     <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                         <i class="fas fa-list mr-2 text-emerald-600"></i>
                         Daftar Event
                     </h3>
                     <div id="admin-events-list" class="space-y-3">
+                    </div>
+                </div>
+
+                <!-- Admin Activity Log -->
+                <div class="card p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-clipboard-list mr-2 text-purple-600"></i>
+                            Log Aktivitas Admin
+                            <span class="ml-2 bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-bold" id="log-count">0</span>
+                        </h3>
+                        <button onclick="exportAdminLogs()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                            <i class="fas fa-file-excel mr-2"></i>Export Log
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto bg-gray-50 rounded-xl max-h-96 overflow-y-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-purple-600 text-white sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">No</th>
+                                    <th class="px-4 py-3 text-left">Waktu</th>
+                                    <th class="px-4 py-3 text-left">Aktivitas</th>
+                                    <th class="px-4 py-3 text-left">Detail</th>
+                                    <th class="px-4 py-3 text-left">Device</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-logs-table" class="divide-y divide-gray-200">
+                                <tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Memuat log...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1201,6 +1231,7 @@
                 this.eventsRef = this.db.ref('events');
                 this.ticketsRef = this.db.ref('tickets');
                 this.settingsRef = this.db.ref('settings');
+                this.adminLogsRef = this.db.ref('adminLogs');
                 this.init();
             }
             
@@ -1344,6 +1375,29 @@
             
             offUserTicketsChange() {
                 this.ticketsRef.child(this.getDeviceId()).off();
+            }
+            
+            async logAdminActivity(action, details = '') {
+                const logId = 'log-' + Date.now();
+                await this.adminLogsRef.child(logId).set({
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    action: action,
+                    details: details,
+                    deviceId: this.getDeviceId(),
+                    deviceInfo: getDeviceInfo()
+                });
+            }
+            
+            onAdminLogsChange(callback) {
+                this.adminLogsRef.orderByChild('timestamp').limitToLast(100).on('value', snapshot => {
+                    const data = snapshot.val();
+                    const logs = data ? Object.values(data).reverse() : [];
+                    callback(logs);
+                });
+            }
+            
+            offAdminLogsChange() {
+                this.adminLogsRef.off();
             }
         }
 
@@ -1594,6 +1648,8 @@
                     closeAdminLogin();
                     showAdminDashboard();
                     showNotification('success', 'Login berhasil!');
+                    // Log activity
+                    await db.logAdminActivity('LOGIN', 'Admin berhasil login');
                 } else {
                     recordFailedAttempt();
                     const lockStatus = checkLockout();
@@ -1621,7 +1677,8 @@
             }
         });
 
-        function logoutAdmin() {
+        async function logoutAdmin() {
+            await db.logAdminActivity('LOGOUT', 'Admin logout');
             isAdmin = false;
             document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('user-dashboard').classList.remove('hidden');
@@ -1665,6 +1722,7 @@
             
             try {
                 await db.changeAdminPassword(oldPass, newPass);
+                await db.logAdminActivity('CHANGE_PASSWORD', 'Password admin diubah');
                 closeAdminSettings();
                 showNotification('success', 'Password berhasil diubah!');
             } catch (error) {
@@ -1690,13 +1748,19 @@
         function renderUserEvents() {
             const now = new Date();
             
-            // Filter tickets
+            // Filter tickets - AUTO EXPIRE JIKA EVENT BERAKHIR
             const activeTickets = cachedTickets.filter(t => {
                 const event = cachedEvents.find(e => e.id === t.eventId);
+                // Tiket aktif: belum selesai DAN event belum berakhir
                 return event && !t.completed && new Date(event.endDate) > now;
             });
             
-            const completedTickets = cachedTickets.filter(t => t.completed);
+            // Completed tickets: sudah selesai ATAU event sudah berakhir
+            const completedTickets = cachedTickets.filter(t => {
+                const event = cachedEvents.find(e => e.id === t.eventId);
+                // Tiket selesai jika: sudah diklik selesai ATAU event sudah berakhir
+                return t.completed || (event && new Date(event.endDate) <= now);
+            });
             
             // Filter events
             const availableEvents = cachedEvents.filter(e => {
@@ -1752,10 +1816,14 @@
         }
 
         function createTicketCard(event, ticket, isCompleted) {
+            // Check apakah event sudah berakhir
+            const eventEnded = new Date(event.endDate) <= new Date();
+            const isExpired = isCompleted || eventEnded;
+            
             return `
-                <div class="card p-5 relative overflow-hidden ${isCompleted ? 'opacity-60' : ''}">
-                    ${isCompleted ? 
-                        '<div class="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold"><i class="fas fa-check mr-1"></i>SELESAI</div>' : 
+                <div class="card p-5 relative overflow-hidden ${isExpired ? 'opacity-60' : ''}">
+                    ${isExpired ? 
+                        `<div class="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold"><i class="fas fa-${eventEnded ? 'clock' : 'check'} mr-1"></i>${eventEnded ? 'BERAKHIR' : 'SELESAI'}</div>` : 
                         '<div class="event-badge"><i class="fas fa-star mr-1"></i>AKTIF</div>'}
                     
                     <div class="flex items-start gap-3 mb-4">
@@ -1774,13 +1842,13 @@
                         <p class="flex items-center"><i class="fas fa-key mr-2 text-yellow-500 w-4"></i><span class="font-bold text-emerald-700">${event.eventCode}</span></p>
                     </div>
                     
-                    ${!isCompleted ? `
+                    ${!isExpired ? `
                         <button onclick="showTicket('${event.id}')" class="w-full btn-primary text-white py-3 rounded-xl font-semibold">
                             <i class="fas fa-qrcode mr-2"></i>Buka Tiket
                         </button>
                     ` : `
                         <div class="text-center py-3 bg-gray-100 rounded-xl text-gray-500 text-sm">
-                            <i class="fas fa-check-circle mr-2"></i>Sudah Digunakan
+                            <i class="fas fa-${eventEnded ? 'clock' : 'check-circle'} mr-2"></i>${eventEnded ? 'Event Sudah Berakhir' : 'Sudah Digunakan'}
                         </div>
                     `}
                 </div>
@@ -2169,12 +2237,86 @@
         // ============================================
         // ADMIN DASHBOARD
         // ============================================
+        let cachedLogs = [];
+        
         function loadAdminDashboard() {
             db.onEventsChange(events => {
                 cachedEvents = events;
                 updateAdminStats();
                 loadAdminEventsList();
             });
+            
+            // Load admin logs
+            db.onAdminLogsChange(logs => {
+                cachedLogs = logs;
+                renderAdminLogs(logs);
+            });
+        }
+        
+        function renderAdminLogs(logs) {
+            const tbody = document.getElementById('admin-logs-table');
+            const countEl = document.getElementById('log-count');
+            
+            if (!tbody) return;
+            
+            countEl.textContent = logs.length;
+            
+            if (logs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-6 text-center text-gray-500">Belum ada aktivitas</td></tr>';
+                return;
+            }
+            
+            const actionLabels = {
+                'LOGIN': { label: 'Login', color: 'bg-green-100 text-green-700' },
+                'LOGOUT': { label: 'Logout', color: 'bg-gray-100 text-gray-700' },
+                'CREATE_EVENT': { label: 'Buat Event', color: 'bg-blue-100 text-blue-700' },
+                'EDIT_EVENT': { label: 'Edit Event', color: 'bg-yellow-100 text-yellow-700' },
+                'DELETE_EVENT': { label: 'Hapus Event', color: 'bg-red-100 text-red-700' },
+                'CHANGE_PASSWORD': { label: 'Ganti Password', color: 'bg-purple-100 text-purple-700' },
+                'EXPORT_VISITORS': { label: 'Export Data', color: 'bg-emerald-100 text-emerald-700' }
+            };
+            
+            tbody.innerHTML = logs.slice(0, 100).map((log, i) => {
+                const actionInfo = actionLabels[log.action] || { label: log.action, color: 'bg-gray-100 text-gray-700' };
+                return `
+                    <tr class="hover:bg-gray-100">
+                        <td class="px-4 py-3 font-semibold">${i + 1}</td>
+                        <td class="px-4 py-3 text-xs">${log.timestamp ? formatDate(new Date(log.timestamp)) : '-'}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${actionInfo.color}">${actionInfo.label}</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600 max-w-xs truncate">${log.details || '-'}</td>
+                        <td class="px-4 py-3">
+                            <code class="bg-gray-200 px-2 py-1 rounded text-xs">${log.deviceId || '-'}</code>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function exportAdminLogs() {
+            if (cachedLogs.length === 0) {
+                showNotification('error', 'Tidak ada log untuk diexport');
+                return;
+            }
+            
+            const data = cachedLogs.map((log, i) => ({
+                'No': i + 1,
+                'Waktu': log.timestamp ? formatDate(new Date(log.timestamp)) : '-',
+                'Aktivitas': log.action || '-',
+                'Detail': log.details || '-',
+                'Device ID': log.deviceId || '-',
+                'Device': log.deviceInfo?.device || '-',
+                'Browser': log.deviceInfo?.browser || '-'
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Admin Logs');
+            
+            XLSX.writeFile(wb, `Admin_Logs_${new Date().toISOString().split('T')[0]}.xlsx`);
+            
+            showNotification('success', 'Log berhasil diexport!');
         }
 
         function updateAdminStats() {
@@ -2264,6 +2406,7 @@
             
             try {
                 const { eventCode } = await db.createEvent(eventData);
+                await db.logAdminActivity('CREATE_EVENT', `Event: ${eventData.name}`);
                 closeCreateEventModal();
                 showNotification('success', 'Event berhasil dibuat! Kode: ' + eventCode);
             } catch (error) {
@@ -2459,6 +2602,7 @@
             
             try {
                 await db.updateEvent(currentEventId, updatedData);
+                await db.logAdminActivity('EDIT_EVENT', `Event: ${updatedData.name}`);
                 closeEditEventModal();
                 closeEventDetailModal();
                 showNotification('success', 'Event berhasil diupdate!');
@@ -2472,7 +2616,10 @@
             if (!confirm('Hapus event ini?\nSemua data pengunjung akan terhapus!')) return;
             
             try {
+                const event = cachedEvents.find(e => e.id === currentEventId);
+                const eventName = event ? event.name : 'Unknown';
                 await db.deleteEvent(currentEventId);
+                await db.logAdminActivity('DELETE_EVENT', `Event: ${eventName}`);
                 closeEventDetailModal();
                 showNotification('success', 'Event berhasil dihapus!');
             } catch (error) {
@@ -2515,6 +2662,9 @@
             ws['!cols'] = colWidths;
             
             XLSX.writeFile(wb, `Pengunjung_${event.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            
+            // Log activity
+            db.logAdminActivity('EXPORT_VISITORS', `Event: ${event.name} (${visitors.length} pengunjung)`);
             
             showNotification('success', 'File Excel berhasil didownload!');
         }
